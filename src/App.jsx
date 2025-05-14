@@ -9,12 +9,7 @@ import loginService from './services/login'
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [notification, setNotification] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [newBlogTitle, setNewBlogTitle] = useState('')
-  const [newBlogAuthor, setNewBlogAuthor] = useState('')
-  const [newBlogUrl, setNewBlogUrl] = useState('')
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -32,12 +27,11 @@ const App = () => {
   }, [])
 
   /* handlers */
-  const handleLogin = async (event) => {
-    event.preventDefault()
-    console.log('logging in with', username, password)
+  const login = async (credentials) => {
+    console.log('logging in with', credentials.username, credentials.password)
 
     try {
-      const user = await loginService.login({ username, password })
+      const user = await loginService.login(credentials)
 
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
 
@@ -47,19 +41,8 @@ const App = () => {
     } catch (error) {
       notify('Wrong credentials', 'error', 5000)
     }
-
-    setUsername('')
-    setPassword('')
   }
-  const handleCreateBlog = async (event) => {
-    event.preventDefault()
-
-    const newBlog = {
-      title: newBlogTitle,
-      author: newBlogAuthor,
-      url: newBlogUrl
-    }
-
+  const createBlog = async (newBlog) => {
     try {
       const addedBlog = await blogService.create(newBlog)
       let newBlogs = blogs
@@ -93,24 +76,12 @@ const App = () => {
 
       {!user ?
         (
-          <LoginForm
-            handleLogin={handleLogin}
-            username={username}
-            setUsername={setUsername}
-            password={password}
-            setPassword={setPassword}
-          />
+          <LoginForm login={login} />
         ) :
         (
           <>
             <NewBlogForm
-              handleCreateBlog={handleCreateBlog}
-              newBlogTitle={newBlogTitle}
-              setNewBlogTitle={setNewBlogTitle}
-              newBlogAuthor={newBlogAuthor}
-              setNewBlogAuthor={setNewBlogAuthor}
-              newBlogUrl={newBlogUrl}
-              setNewBlogUrl={setNewBlogUrl}
+              createBlog={createBlog}
             />
             <p>{user.username} logged-in <button onClick={handleLogout}>logout</button></p>
             <h2>Blogs</h2>
