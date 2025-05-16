@@ -62,10 +62,42 @@ const App = () => {
       notify(error.response.data.error, 'error', 5000)
     }
   }
+
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
     setUser(null)
     blogService.setToken(null)
+  }
+
+  const likeBlog = async (likedBlog) => {
+    try {
+      likedBlog.likes += 1
+      const result = await blogService.modify(likedBlog)
+      
+      let newBlogs = blogs
+      newBlogs[newBlogs.findIndex(elem => elem.id === likedBlog.id)] = result
+      setBlogs(newBlogs)
+
+      notify(`You liked blog: "${likedBlog.title}" by ${likedBlog.author}.`, 'success', 5000)
+    } catch (error) {
+      notify(error.response.data.error, 'error', 5000)
+    }
+  }
+
+  const deleteBlog = async (blogToDelete) => {
+    try {
+      if (user.username === blogToDelete.user.username && window.confirm(`Delete blog: "${blogToDelete.title}" by ${blogToDelete.author}?`)) {
+        
+        await blogService.remove(blogToDelete.id)
+        
+        let newBlogs = blogs.filter(elem => elem.id !== blogToDelete.id)
+        setBlogs(newBlogs)
+      } else {
+        notify('You cannot delete post of someone else!', 'error', 5000)
+      }
+    } catch (error) {
+      notify(error.response.data.error, 'error', 5000)
+    }
   }
 
   /* helpers */
@@ -74,8 +106,10 @@ const App = () => {
     setTimeout(() => setNotification(null), timeout)
   }
   const blogComponents = () => {
-    return blogs.map(blog =>
-      <Blog key={blog.id} blog={blog} />
+    let bloglist = blogs
+    bloglist.sort((a,b) => b.likes - a.likes)
+    return bloglist.map(blog =>
+      <Blog key={blog.id} blog={blog} likeBlog={() => likeBlog(blog)} deleteBlog={() => deleteBlog(blog)}/>
     )
   }
 
