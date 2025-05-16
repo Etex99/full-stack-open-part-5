@@ -45,7 +45,7 @@ const App = () => {
 
       blogService.setToken(user.token)
       setUser(user)
-      
+
     } catch (error) {
       notify('Wrong credentials', 'error', 5000)
     }
@@ -73,7 +73,7 @@ const App = () => {
     try {
       likedBlog.likes += 1
       const result = await blogService.modify(likedBlog)
-      
+
       let newBlogs = blogs
       newBlogs[newBlogs.findIndex(elem => elem.id === likedBlog.id)] = result
       setBlogs(newBlogs)
@@ -87,9 +87,9 @@ const App = () => {
   const deleteBlog = async (blogToDelete) => {
     try {
       if (user.username === blogToDelete.user.username && window.confirm(`Delete blog: "${blogToDelete.title}" by ${blogToDelete.author}?`)) {
-        
+
         await blogService.remove(blogToDelete.id)
-        
+
         let newBlogs = blogs.filter(elem => elem.id !== blogToDelete.id)
         setBlogs(newBlogs)
       } else {
