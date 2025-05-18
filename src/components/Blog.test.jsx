@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 import { beforeEach, expect } from 'vitest'
-import { exact } from 'prop-types'
 
 const blog = {
   id: '123456789012345678901234',
@@ -42,13 +41,31 @@ describe('<Blog />', () => {
     expect(screen.getByText(blog.title, { exact: false })).toBeDefined()
     expect(screen.getByText(blog.author, { exact: false })).toBeDefined()
     
-    const url = await screen.queryByText(blog.url, { exact: false })
-    const likes = await screen.queryByText(`likes: ${blog.likes}`, { exact: false })
-    const username = await screen.queryByText(blog.user.username, { exact: false })
+    const url = screen.queryByText(blog.url, { exact: false })
+    const likes = screen.queryByText(`likes: ${blog.likes}`, { exact: false })
+    const username = screen.queryByText(blog.user.username, { exact: false })
 
     expect(url).toBeNull
     expect(likes).toBeNull
     expect(username).toBeNull
+  })
+
+  test('Clicking show reveals blog url, likes and username', async () => {
+    await user.click(screen.getByText('view'))
+
+    expect(screen.getByText(blog.url, { exact: false })).toBeDefined()
+    expect(screen.getByText(`likes: ${blog.likes}`, { exact: false })).toBeDefined()
+    expect(screen.getByText(blog.user.username, { exact: false })).toBeDefined()
+  })
+
+  test('clicking like twice causes its event handler to be called twice', async () => {
+    await user.click(screen.getByText('view'))
+
+    const likeButton = screen.getByText('like')
+    await user.click(likeButton)
+    await user.click(likeButton)
+
+    expect(mockLikeHandler.mock.calls).toHaveLength(2)
   })
   
   test('clicking like or delete calls their respecitive event handlers once', async () => {
