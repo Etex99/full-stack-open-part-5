@@ -27,7 +27,7 @@ describe('<Blog />', () => {
   test('initially renders title and author and not url, likes and username', async () => {
     
     // Find element using data attributes
-    const parent = screen.getByTestId(1)
+    const parent = screen.getByTestId('blog')
     expect(parent).toBeDefined()
   
     // OR using CSS selectors:

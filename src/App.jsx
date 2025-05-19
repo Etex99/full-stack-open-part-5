@@ -50,8 +50,15 @@ const App = () => {
       notify('Wrong credentials', 'error', 5000)
     }
   }
-  const createBlog = async (newBlog) => {
+  const createBlog = async (title, author, url) => {
     try {
+      let newBlog = {
+        title: title,
+        author: author,
+        url: url,
+        likes: 0
+      }
+
       const addedBlog = await blogService.create(newBlog)
       let newBlogs = blogs
       newBlogs.push(addedBlog)
@@ -124,7 +131,7 @@ const App = () => {
         ) :
         (
           <>
-            <p>{user.username} logged-in <button onClick={handleLogout}>logout</button></p>
+            <p>{user.name} logged-in <button onClick={handleLogout}>logout</button></p>
             {newBlogForm()}
             <h3>Posts</h3>
             {blogComponents()}

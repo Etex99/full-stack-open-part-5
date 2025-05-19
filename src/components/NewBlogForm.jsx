@@ -7,11 +7,7 @@ const NewBlogForm = ({ createBlog }) => {
 
   const handleSubmitForm = (event) => {
     event.preventDefault()
-    createBlog({
-      title: title,
-      author: author,
-      url: url
-    })
+    createBlog(title, author, url)
 
     setAuthor('')
     setTitle('')

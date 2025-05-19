@@ -8,7 +8,7 @@ const Blog = ({ blog, likeBlog, deleteBlog }) => {
   )
 
   return (
-    <div className='blog' data-testid='1' >
+    <div className='blog' data-testid='blog' >
       {blog.title} {blog.author} {toggle()}
       {showDetails ?
         (
