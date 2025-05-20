@@ -13,4 +13,13 @@ const createBlog = async (page, title, author, url) => {
   await page.getByTestId('notification').waitFor()
 }
 
-export { loginWith, createBlog }
+const likeBlogWithTitle = async (page, title, likesToGrant) => {
+  const blogDiv = page.getByText(title)
+  await (blogDiv.getByRole('button', { name: 'view' })).click()
+  const likeButton = await blogDiv.getByRole('button', { name: 'like' })
+  for (let index = 0; index < likesToGrant; index++) {
+    await likeButton.click()
+  }
+}
+
+export { loginWith, createBlog, likeBlogWithTitle }

@@ -6,7 +6,25 @@ const blog = {
   author: 'test author',
   url: 'test url',
   likes: 0
-}
+} 
+
+const blogs = [
+  {
+    title: 'blog1',
+    author: 'author1',
+    url: 'url1'
+  },
+  {
+    title: 'blog2',
+    author: 'author2',
+    url: 'url2'
+  },
+  {
+    title: 'blog3',
+    author: 'author3',
+    url: 'url3'
+  },
+]
 
 describe('Blogs App', () => {
 
@@ -26,6 +44,7 @@ describe('Blogs App', () => {
         password: 'secret'
       }
     })
+    
     await page.goto('/')
   })
 
@@ -130,6 +149,28 @@ describe('Blogs App', () => {
       blogDiv = page.getByTestId('blog')
       await (blogDiv.getByRole('button', { name: 'view' })).click()
       await expect(blogDiv.getByText('delete')).not.toBeVisible()
+    })
+
+    test.only('blogs are arranged in the order of most likes', async ({ page }) => {
+      await helper.createBlog(page, blogs[0].title, blogs[0].author, blogs[0].url)
+      await helper.createBlog(page, blogs[1].title, blogs[1].author, blogs[1].url)
+      await helper.createBlog(page, blogs[2].title, blogs[2].author, blogs[2].url)
+
+      // disrupt the order by liking posts
+      await helper.likeBlogWithTitle(page, blogs[0].title, 2)
+      await helper.likeBlogWithTitle(page, blogs[1].title, 1)
+      await helper.likeBlogWithTitle(page, blogs[2].title, 3)
+
+      // ...all() lists all matching elements in order of appearance
+      const blogDivs = await page.locator('.blog').all()
+      await expect(blogDivs[0].getByText(blogs[2].title, { exact: false })).toBeVisible()
+      await expect(blogDivs[0].getByText('likes: 3', { exact: false })).toBeVisible()
+
+      await expect(blogDivs[1].getByText(blogs[0].title, { exact: false })).toBeVisible()
+      await expect(blogDivs[1].getByText('likes: 2', { exact: false })).toBeVisible()
+
+      await expect(blogDivs[2].getByText(blogs[1].title, { exact: false })).toBeVisible()
+      await expect(blogDivs[2].getByText('likes: 1', { exact: false })).toBeVisible()
     })
   })
 
