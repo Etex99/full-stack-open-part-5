@@ -99,8 +99,7 @@ const App = () => {
 
         let newBlogs = blogs.filter(elem => elem.id !== blogToDelete.id)
         setBlogs(newBlogs)
-      } else {
-        notify('You cannot delete post of someone else!', 'error', 5000)
+        notify(`Deleted blog: "${blogToDelete.title}"`, 'success', 5000)
       }
     } catch (error) {
       notify(error.response.data.error, 'error', 5000)
@@ -115,9 +114,13 @@ const App = () => {
   const blogComponents = () => {
     let bloglist = blogs
     bloglist.sort((a,b) => b.likes - a.likes)
-    return bloglist.map(blog =>
-      <Blog key={blog.id} blog={blog} likeBlog={() => likeBlog(blog)} deleteBlog={() => deleteBlog(blog)}/>
-    )
+
+    return bloglist.map(blog => {
+      if (blog.user.username === user.username) {
+        return (<Blog key={blog.id} blog={blog} likeBlog={() => likeBlog(blog)} deleteBlog={() => deleteBlog(blog)}/>)
+      }
+      return (<Blog key={blog.id} blog={blog} likeBlog={() => likeBlog(blog)} />)
+    })
   }
 
   return (

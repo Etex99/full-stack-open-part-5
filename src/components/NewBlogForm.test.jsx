@@ -28,6 +28,8 @@ describe('<NewBlogForm />', () => {
     await user.click(screen.getByTestId('create-blog'))
 
     expect(mockSubmitHandler.mock.calls).toHaveLength(1)
-    expect(mockSubmitHandler.mock.calls[0][0]).toEqual(blog)
+    expect(mockSubmitHandler.mock.calls[0][0]).toEqual(blog.title)
+    expect(mockSubmitHandler.mock.calls[0][1]).toEqual(blog.author)
+    expect(mockSubmitHandler.mock.calls[0][2]).toEqual(blog.url)
   })
 })

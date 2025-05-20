@@ -19,6 +19,13 @@ describe('Blogs App', () => {
         password: 'secret'
       }
     })
+    await request.post('/api/users', {
+      data: {
+        name: 'Playwright User2',
+        username: 'playwright2',
+        password: 'secret'
+      }
+    })
     await page.goto('/')
   })
 
@@ -31,14 +38,14 @@ describe('Blogs App', () => {
 
   describe('Login', () => {
     
-    test('succeeds with correct credentials', async ({page}) => {
+    test('succeeds with correct credentials', async ({ page }) => {
       await helper.loginWith(page, 'playwright', 'secret')
       await page.getByText('Playwright User logged-in').waitFor()
 
       await expect(page.getByText('Playwright User logged-in')).toBeVisible()
     })
 
-    test('fails with wrong credentials', async ({page}) => {
+    test('fails with wrong credentials', async ({ page }) => {
       await helper.loginWith(page, 'playwright', 'wrong')
       await page.locator('.error').waitFor()
 
@@ -52,6 +59,15 @@ describe('Blogs App', () => {
     beforeEach(async ({ page }) => {
       await helper.loginWith(page, 'playwright', 'secret')
       await page.getByText('Playwright User logged-in').waitFor()
+    })
+
+    test('can log out', async ({ page }) => {
+      const logout = page.getByRole('button', { name: 'logout' })
+      await expect(logout).toBeVisible()
+
+      await logout.click()
+      await expect(page.getByText('Log in to application')).toBeVisible()
+      await expect(page.getByText('Playwright User logged-in')).not.toBeVisible()
     })
 
     test('a new blog can be created', async ({ page }) => {
@@ -81,6 +97,39 @@ describe('Blogs App', () => {
 
       expect(blogDiv.getByText('likes: 1')).toBeVisible()
       
+    })
+    
+    test('can delete own blog', async ({ page }) => {
+      await helper.createBlog(page, blog.title, blog.author, blog.url)
+      
+      const blogDiv = page.getByTestId('blog')
+      await (blogDiv.getByRole('button', { name: 'view' })).click()
+
+      page.on('dialog', dialog => dialog.accept());
+      await (blogDiv.getByRole('button', { name: 'delete' })).click()
+      await page.getByTestId('notification').waitFor()
+
+      const success = page.locator('.success')
+      await expect(success).toBeVisible()
+      await expect(success).toHaveText(`Deleted blog: "${blog.title}"`)
+    })
+
+    test('only creator of a blog sees the delete button', async ({ page }) => {
+      await helper.createBlog(page, blog.title, blog.author, blog.url)
+
+      let blogDiv = page.getByTestId('blog')
+      await (blogDiv.getByRole('button', { name: 'view' })).click()
+      await expect(blogDiv.getByText('delete')).toBeVisible()
+
+      const logout = page.getByRole('button', { name: 'logout' })
+      await logout.click()
+
+      helper.loginWith(page, 'playwright2', 'secret')
+      await page.getByText('Playwright User2 logged-in').waitFor()
+
+      blogDiv = page.getByTestId('blog')
+      await (blogDiv.getByRole('button', { name: 'view' })).click()
+      await expect(blogDiv.getByText('delete')).not.toBeVisible()
     })
   })
 
